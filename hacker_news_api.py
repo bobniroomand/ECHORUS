@@ -19,3 +19,8 @@ class HackerNewsAPI:
         item = HackerNewsAPI.get_item(item_id)
         kids = item.get('kids', [])
         return kids
+
+    def get_comment_text(comment_id):
+        item = HackerNewsAPI.get_item(comment_id)
+        text = item.get('text', '')
+        return text
