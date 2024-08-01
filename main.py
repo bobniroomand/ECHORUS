@@ -21,7 +21,26 @@ async def endpoint2():
     comments = []
     for story in top_30_stories:
         comments.extend(HackerNewsAPI.get_comments(story)[:100])
-    
+
+    words = extract_words_counts(comments)[:10]
+    return {"words": [word[0] for word in words]}
+
+
+@app.get("/endpoint3")
+async def endpoint3():
+    top_10_stories = HackerNewsAPI.get_top_stories()[:10]
+
+    comments = []
+    for story_id in top_10_stories:
+        story_comments = HackerNewsAPI.get_comments(story_id)
+        comments.extend(story_comments)
+        comments.extend(get_kids(story_comments))
+
+    words = extract_words_counts(comments)[:10]
+    return {"words": [word[0] for word in words]}
+
+
+def extract_words_counts(comments):
     words = {}
 
     for comment_id in comments:
@@ -33,6 +52,13 @@ async def endpoint2():
             else:
                 words[word] = 1
 
-    words = sorted(words.items(), key=lambda x: x[1], reverse=True)[:10]
-    return {"words": [word[0] for word in words]}
+    return words
 
+def get_kids(comments):
+    ret_val = []
+    for comment_id in comments:
+        kids = HackerNewsAPI.get_comments(comment_id)
+        if kids:
+            ret_val.extend(kids)
+            ret_val.extend(get_kids(kids))
+    return ret_val
